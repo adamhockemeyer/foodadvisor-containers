@@ -8,6 +8,8 @@ RUN yarn install --frozen-lockfile
 ADD . /app
 RUN yarn seed
 
+ENV NODE_ENV production
+
 EXPOSE 1337
 
 CMD ["yarn", "start"]
