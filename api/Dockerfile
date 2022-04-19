@@ -8,6 +8,8 @@ RUN yarn install --frozen-lockfile
 ADD . /app
 RUN yarn seed
 
+RUN yarn build
+
 EXPOSE 1337
 
-CMD ["yarn", "develop"]
+CMD ["yarn", "start"]
