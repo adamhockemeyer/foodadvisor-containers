@@ -29,6 +29,9 @@ WORKDIR /app
 # server for production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+ENV NEXT_PUBLIC_API_URL https://backend-cms.whitecoast-27f7b316.eastus.azurecontainerapps.io
+
 RUN yarn build
 
 # Remove all the development dependencies since we don't
