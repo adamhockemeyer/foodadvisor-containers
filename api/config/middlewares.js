@@ -1,4 +1,5 @@
 module.exports = [
+  'global::application-insights',
   'strapi::errors',
   'strapi::security',
   'strapi::cors',

@@ -12,15 +12,17 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "@strapi/plugin-i18n": "4.1.1",
+    "@strapi/plugin-documentation": "4.1.8",
+    "@strapi/plugin-i18n": "4.1.8",
     "@strapi/plugin-seo": "^1.7.2",
-    "@strapi/plugin-users-permissions": "4.1.1",
-    "@strapi/strapi": "4.1.1",
+    "@strapi/plugin-users-permissions": "4.1.8",
+    "@strapi/strapi": "4.1.8",
+    "applicationinsights": "^2.3.3",
     "fs": "^0.0.1-security",
     "fs-extra": "^10.0.0",
     "lodash": "^4.17.21",
     "lodash.set": "^4.3.2",
-    "sqlite3": "5.0.2",
+    "better-sqlite3": "7.4.6",
     "unzip-stream": "^0.3.1",
     "uuid-v4": "^0.1.0"
   },
@@ -28,7 +30,7 @@
     "name": "A Strapi developer"
   },
   "strapi": {
-    "uuid": "092c44de-692e-4d21-acfa-ed40a3fe01a9"
+    "uuid": "FOODADVISOR-LOCAL-d9527d14-e1ac-4c34-b319-673beff79340"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
