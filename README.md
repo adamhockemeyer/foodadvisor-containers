@@ -1,6 +1,6 @@
 # FoodAdvisor - Azure Strapi Demo
 
-![Deploy to Azure](https://aka.ms/deploytoazurebutton)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fadamhockemeyer%2Ffoodadvisor-containers%2Fmaster%2Fbicep%2Fazuredeploy.json)
 
 
 ![FoodAdvisor](./foodadvisor.png)

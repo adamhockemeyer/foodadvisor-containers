@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "bicep/**"
+      - "!bicep/azuredeploy.json"
       - ".github/workflows/bicep-to-arm.yml"
     branches: ["master"]
   workflow_dispatch:
@@ -31,8 +32,3 @@ jobs:
           git add ./bicep/azuredeploy.json
           git commit -m "Add generated ARM template"
           git push
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: azuredeploy.json
-          path: ${{ env.BICEP_PATH }}/azuredeploy.json
