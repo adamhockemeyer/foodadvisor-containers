@@ -23,6 +23,15 @@ jobs:
           bicepFilePath: ${{ env.BICEP_PATH }}/main.bicep
           outputFilePath: ${{ env.BICEP_PATH }}/azuredeploy.json
 
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "Github Actions"
+          git config --global user.email "automation@github.com"
+
+          git add ./bicep/azuredeploy.json
+          git commit -m "Add generated ARM template"
+          git push
+
       - uses: actions/upload-artifact@v3
         with:
           name: azuredeploy.json
