@@ -1,0 +1,15 @@
+name: Build Bicep and output ARM template
+on:
+  push:
+    paths:
+      - "bicep/**"
+    branches: ["master"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bicep Build
+        uses: Azure/bicep-build-action@v1.0.0
+        with:
+          bicepFilePath: main.bicep
+          outputFilePath: azuredeploy.json
