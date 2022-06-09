@@ -8,8 +8,9 @@ name: Create and publish a Docker image
 on:
   push:
     paths:
-    - 'client/**'
-    branches: ['master']
+      - "client/**"
+    branches: ["master"]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io

@@ -4,6 +4,7 @@ on:
     paths:
       - "bicep/**"
     branches: ["master"]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
