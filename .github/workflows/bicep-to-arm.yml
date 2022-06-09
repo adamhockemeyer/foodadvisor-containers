@@ -14,6 +14,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Log
+        run: ls
+        shell: bash
+
       - name: Bicep Build
         uses: Azure/bicep-build-action@v1.0.0
         with:
