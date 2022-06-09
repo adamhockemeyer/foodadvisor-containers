@@ -3,11 +3,12 @@ on:
   push:
     paths:
       - "bicep/**"
+      - ".github/workflows/bicep-to-arm.yml"
     branches: ["master"]
   workflow_dispatch:
 
 env:
-  BICEP_PATH: ../bicep
+  BICEP_PATH: ./bicep
 
 jobs:
   build:
