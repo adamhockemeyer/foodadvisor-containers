@@ -1,4 +1,4 @@
-name: Build Bicep and output ARM template
+name: Bicep to ARM
 on:
   push:
     paths:

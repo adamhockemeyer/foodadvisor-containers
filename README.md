@@ -1,4 +1,10 @@
-# FoodAdvisor - Azure Strapi Demo
+# FoodAdvisor - Containers - Azure Strapi Demo
+
+
+![API Docker](https://github.com/adamhockemeyer/foodadvisor-containers/actions/workflows/docker-image-api.yml/badge.svg)
+![Client Docker](https://github.com/adamhockemeyer/foodadvisor-containers/actions/workflows/docker-image-client.yml/badge.svg)
+![Bicep to ARM](https://github.com/adamhockemeyer/foodadvisor-containers/actions/workflows/bicep-to-arm.yml/badge.svg)
+
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fadamhockemeyer%2Ffoodadvisor-containers%2Fmaster%2Fbicep%2Fazuredeploy.json)
 
