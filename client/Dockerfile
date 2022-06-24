@@ -30,8 +30,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV NEXT_PUBLIC_API_URL https://backend-cms.whitecoast-27f7b316.eastus.azurecontainerapps.io
-
 RUN yarn build
 
 # Remove all the development dependencies since we don't
@@ -60,7 +58,7 @@ COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /app/public ./public
 COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /app/.next ./.next
 
 # 4. OPTIONALLY the next.config.js, if your app has one
-# COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /app/next.config.js  ./
+COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /app/next.config.js  ./
 
 USER nextjs
 
