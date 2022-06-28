@@ -5,14 +5,15 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "9081295333858273282"
+      "templateHash": "6427999607722442670"
     }
   },
   "parameters": {
     "namePrefix": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "[format('container-apps-food-{0}', uniqueString(subscription().id))]"
     },
-    "location": {
+    "region": {
       "type": "string",
       "defaultValue": "eastus"
     },
@@ -26,16 +27,12 @@
         "prod"
       ]
     },
-    "utcShort": {
-      "type": "string",
-      "defaultValue": "[utcNow('d')]"
-    },
     "defaultTags": {
       "type": "object",
       "defaultValue": {
         "Department": "R&D",
         "Environment": "[parameters('environment')]",
-        "Updated": "[parameters('utcShort')]",
+        "Updated": "[utcNow('d')]",
         "ManagedBy": "Bicep",
         "Owner": "group@org.com"
       }
@@ -43,6 +40,7 @@
   },
   "variables": {
     "resourceGroupName": "[format('{0}-rg', parameters('namePrefix'))]",
+    "location": "[parameters('region')]",
     "previewSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment')]"
   },
   "resources": [
@@ -50,7 +48,7 @@
       "type": "Microsoft.Resources/resourceGroups",
       "apiVersion": "2021-04-01",
       "name": "[variables('resourceGroupName')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "tags": "[parameters('defaultTags')]"
     },
     {
@@ -227,7 +225,7 @@
             "value": "[parameters('namePrefix')]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "environment": {
             "value": "[parameters('environment')]"
