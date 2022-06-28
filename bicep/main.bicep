@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
-param namePrefix string
-param location string = 'eastus'
+param namePrefix string = 'container-apps-food-${uniqueString(subscription().id)}'
+param region string = 'eastus'
 @allowed([
   'dev'
   'test'
@@ -9,16 +9,16 @@ param location string = 'eastus'
   'prod'
 ])
 param environment string = 'dev'
-param utcShort string = utcNow('d')
 param defaultTags object = {
   Department: 'R&D'
   Environment: environment
-  Updated: utcShort
+  Updated: utcNow('d')
   ManagedBy: 'Bicep'
   Owner: 'group@org.com'
 }
 
 var resourceGroupName = '${namePrefix}-rg'
+var location = region
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -140,5 +140,3 @@ module conatinerApp_Frontend 'modules/container-apps.bicep' = {
 }
 
 // Update the backend container app environment variables if this is the first time deploying the front end
-
-
