@@ -182,7 +182,7 @@ module conatinerApp_Frontend 'modules/container-apps.bicep' = {
       }
       {
         name: 'PREVIEW_SECRET'
-        secrefRef: 'preview-secret'
+        secretRef: 'preview-secret'
       }
     ]
   }
