@@ -109,6 +109,10 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
         value: jwtSecret
       }
       {
+        name: 'strapi-admin-client-preview-secret'
+        value: previewSecret
+      }
+      {
         name: 'app-insights-connection-string'
         value: applicationInsights.outputs.connectionString
       }
@@ -131,7 +135,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
       }
       {
         name: 'STRAPI_ADMIN_CLIENT_PREVIEW_SECRET'
-        secretRef: previewSecret
+        secretRef: 'strapi-admin-client-preview-secret'
       }
       {
         name: 'PORT'
@@ -162,7 +166,12 @@ module conatinerApp_Frontend 'modules/container-apps.bicep' = {
     environment: environment
     tags: defaultTags
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
-    secrets: []
+    secrets: [
+      {
+        name: 'preview-secret'
+        value: previewSecret
+      }
+    ]
     containerImage: 'ghcr.io/adamhockemeyer/foodadvisor-containers-client:master'
     containerName: 'frontend'
     containerTargetPort: 3000
@@ -173,7 +182,7 @@ module conatinerApp_Frontend 'modules/container-apps.bicep' = {
       }
       {
         name: 'PREVIEW_SECRET'
-        value: previewSecret
+        secrefRef: 'preview-secret'
       }
     ]
   }
