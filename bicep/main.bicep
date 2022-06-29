@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
 param namePrefix string = 'container-apps-food-${uniqueString(subscription().id)}'
-param region string = 'eastus'
+param location string = deployment().location
 @allowed([
   'dev'
   'test'
@@ -9,6 +9,10 @@ param region string = 'eastus'
   'prod'
 ])
 param environment string = 'dev'
+@allowed([
+  'sqlite'
+])
+param databaseType string = 'sqlite'
 param defaultTags object = {
   Department: 'R&D'
   Environment: environment
@@ -18,7 +22,7 @@ param defaultTags object = {
 }
 
 var resourceGroupName = '${namePrefix}-rg'
-var location = region
+var isSqlite = databaseType == 'sqlite'
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -48,6 +52,16 @@ module applicationInsights 'modules/app-insights.bicep' = {
   }
 }
 
+module fileStorage 'modules/file-storage.bicep' = if (isSqlite) {
+  name: 'file-storage'
+  scope: rg
+  params: {
+    name: namePrefix
+    location: location
+    environment: environment
+  }
+}
+
 module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
   name: 'container-apps-environment'
   scope: rg
@@ -56,10 +70,15 @@ module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
     location: location
     environment: environment
     workspaceResourceId: logAnalytics.outputs.resourceId
+    storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
+    fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''
   }
 }
 
 var previewSecret = uniqueString(rg.id, environment, containerAppsEnvironment.name)
+var adminJwtSecret = uniqueString(rg.id, environment, containerAppsEnvironment.name, 'admin-jwt-secret')
+var apiSaltToken = uniqueString(rg.id, environment, containerAppsEnvironment.name, 'api-salt-token')
+var jwtSecret = uniqueString(rg.id, environment, containerAppsEnvironment.name, 'jwt-secret')
 
 module conatinerApp_Backend 'modules/container-apps.bicep' = {
   name: 'container-app-backend'
@@ -70,21 +89,39 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     environment: environment
     tags: defaultTags
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
+    volumeName: isSqlite ? 'azure-files-volume' : ''
+    volumeAzureFilesStorageName: isSqlite ? 'storage' : ''
+    volumeMountPath: isSqlite ? '/file-mount' : ''
     secrets: [
       {
         name: 'admin-jwt-secret'
+        value: adminJwtSecret
       }
       {
         name: 'api-salt-token'
+        value: apiSaltToken
       }
       {
         name: 'jwt-secret'
+        value: jwtSecret
+      }
+      {
+        name: 'app-insights-connection-string'
+        value: applicationInsights.outputs.connectionString
       }
     ]
     containerImage: 'ghcr.io/adamhockemeyer/foodadvisor-containers-api:master'
     containerName: 'strapi'
     containerTargetPort: 1337
     containerEnvironmentVariables: [
+      isSqlite ? {
+        name: ''
+        value: 'file-mount/data.db'
+      } : {}
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        secretRef: 'app-insights-connection-string'
+      }
       {
         name: 'STRAPI_ADMIN_CLIENT_URL'
         value: 'TBD'
