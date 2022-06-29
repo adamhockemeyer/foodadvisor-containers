@@ -37,6 +37,7 @@ module logAnalytics './modules/log-analytics.bicep' = {
     name: namePrefix
     location: rg.location
     environment: environment
+    tags: defaultTags
   }
 }
 
@@ -59,6 +60,7 @@ module fileStorage 'modules/file-storage.bicep' = if (isSqlite) {
     name: namePrefix
     location: location
     environment: environment
+    tags: defaultTags
   }
 }
 
@@ -69,6 +71,7 @@ module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
     name: namePrefix
     location: location
     environment: environment
+    tags: defaultTags
     workspaceResourceName: logAnalytics.outputs.resourceName
     storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
     fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''

@@ -46,7 +46,7 @@ resource containerAppsEnvironmentStorage 'Microsoft.App/managedEnvironments/stor
   parent: containerAppsEnvironment
   properties: {
     azureFile: {
-      accountKey: storageAccount.listAccountSas().accountSasToken
+      accountKey: storageAccount.listKeys().keys[0].value
       accountName: storageAccount.name
       shareName: fileShare.name
       accessMode: 'ReadWrite'
