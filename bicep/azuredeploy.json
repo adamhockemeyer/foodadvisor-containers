@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "13445548238364938964"
+      "templateHash": "8636299853459535571"
     }
   },
   "parameters": {
@@ -80,6 +80,9 @@
           },
           "environment": {
             "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
           }
         },
         "template": {
@@ -250,6 +253,9 @@
           },
           "environment": {
             "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
           }
         },
         "template": {
@@ -362,6 +368,9 @@
           "environment": {
             "value": "[parameters('environment')]"
           },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
+          },
           "workspaceResourceName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')).outputs.resourceName.value]"
           },
@@ -379,7 +388,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "14583038772157452812"
+              "templateHash": "7853419311376045813"
             }
           },
           "parameters": {
@@ -442,7 +451,7 @@
               "name": "[format('{0}/{1}', variables('resourceName'), 'storage')]",
               "properties": {
                 "azureFile": {
-                  "accountKey": "[listAccountSas(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').accountSasToken]",
+                  "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value]",
                   "accountName": "[parameters('storageAccountName')]",
                   "shareName": "[parameters('fileShareName')]",
                   "accessMode": "ReadWrite"
