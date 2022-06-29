@@ -69,7 +69,7 @@ module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
     name: namePrefix
     location: location
     environment: environment
-    workspaceResourceId: logAnalytics.outputs.resourceId
+    workspaceResourceName: logAnalytics.outputs.resourceName
     storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
     fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''
   }

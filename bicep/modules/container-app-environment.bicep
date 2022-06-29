@@ -9,9 +9,13 @@ param storageAccountName string = ''
 @description('If mounting storage, provide the file share name, otherwise leave empty.')
 param fileShareName string = ''
 
-param workspaceResourceId string
+param workspaceResourceName string
 
 var resourceName = '${name}-${environment}-cae'
+
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
+   name: workspaceResourceName
+}
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
   name: resourceName
@@ -21,7 +25,8 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01'
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
-        customerId: workspaceResourceId
+        customerId: logAnalytics.properties.customerId
+        sharedKey: logAnalytics.listKeys().primarySharedKey
       }
     }
     zoneRedundant: false
