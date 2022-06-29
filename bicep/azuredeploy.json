@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "8636299853459535571"
+      "templateHash": "14247051445977149575"
     }
   },
   "parameters": {
@@ -488,7 +488,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[format('{0}-backend', parameters('namePrefix'))]"
+            "value": "backend"
           },
           "location": {
             "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), '2021-04-01', 'full').location]"
@@ -746,7 +746,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[format('{0}-frontend', parameters('namePrefix'))]"
+            "value": "frontend"
           },
           "location": {
             "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), '2021-04-01', 'full').location]"
