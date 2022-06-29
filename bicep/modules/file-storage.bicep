@@ -15,7 +15,6 @@ param tags object = {}
   'Standard_ZRS'
 ])
 param sku string = 'Standard_GZRS'
-param fileServiceName string = 'containerapp-files'
 param fileShareName string = 'containerapp-mount'
 
 var resourceName = substring(replace('${name}-${environment}-sa', '-', ''), 0, 24)
@@ -33,14 +32,8 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   tags: tags
 }
 
-resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2021-09-01' = {
-  name: fileServiceName
-  parent: storageAccount
-}
-
 resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' = {
-  name: fileShareName
-  parent: fileService
+  name: '${storageAccount.name}/default/${fileShareName}'
   properties: {
     enabledProtocols: 'SMB'
     shareQuota: 5
