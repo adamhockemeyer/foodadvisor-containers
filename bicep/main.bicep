@@ -122,7 +122,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     containerTargetPort: 1337
     containerEnvironmentVariables: [
       isSqlite ? {
-        name: ''
+        name: 'DATABASE_FILENAME'
         value: 'file-mount/data.db'
       } : {}
       {
