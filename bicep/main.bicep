@@ -87,7 +87,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
   name: 'container-app-backend'
   scope: rg
   params: {
-    name: '${namePrefix}-backend'
+    name: 'backend'
     location: rg.location
     environment: environment
     tags: defaultTags
@@ -157,7 +157,7 @@ module conatinerApp_Frontend 'modules/container-apps.bicep' = {
   name: 'container-app-frontend'
   scope: rg
   params: {
-    name: '${namePrefix}-frontend'
+    name: 'frontend'
     location: rg.location
     environment: environment
     tags: defaultTags
