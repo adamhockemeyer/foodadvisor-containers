@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "14247051445977149575"
+      "templateHash": "9177523619748891428"
     }
   },
   "parameters": {
@@ -526,6 +526,10 @@
                 "value": "[variables('jwtSecret')]"
               },
               {
+                "name": "strapi-admin-client-preview-secret",
+                "value": "[variables('previewSecret')]"
+              },
+              {
                 "name": "app-insights-connection-string",
                 "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'application-insights')).outputs.connectionString.value]"
               }
@@ -553,7 +557,7 @@
               },
               {
                 "name": "STRAPI_ADMIN_CLIENT_PREVIEW_SECRET",
-                "secretRef": "[variables('previewSecret')]"
+                "secretRef": "strapi-admin-client-preview-secret"
               },
               {
                 "name": "PORT",
@@ -761,7 +765,12 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.managedEnvironmentId.value]"
           },
           "secrets": {
-            "value": []
+            "value": [
+              {
+                "name": "preview-secret",
+                "value": "[variables('previewSecret')]"
+              }
+            ]
           },
           "containerImage": {
             "value": "ghcr.io/adamhockemeyer/foodadvisor-containers-client:master"
@@ -780,7 +789,7 @@
               },
               {
                 "name": "PREVIEW_SECRET",
-                "value": "[variables('previewSecret')]"
+                "secrefRef": "preview-secret"
               }
             ]
           }
