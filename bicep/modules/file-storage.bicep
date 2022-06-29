@@ -21,7 +21,7 @@ param fileShareName string = 'containerapp-mount'
 var resourceName = '${name}-${environment}-sa'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
-  name: replace(resourceName, '-', '')
+  name: substring(replace(resourceName, '-', ''),0,24)
   location: location
   sku: {
     name: sku
