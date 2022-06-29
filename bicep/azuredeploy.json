@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "9177523619748891428"
+      "templateHash": "10213256362975801854"
     }
   },
   "parameters": {
@@ -546,7 +546,7 @@
           },
           "containerEnvironmentVariables": {
             "value": [
-              "[if(variables('isSqlite'), createObject('name', '', 'value', 'file-mount/data.db'), createObject())]",
+              "[if(variables('isSqlite'), createObject('name', 'DATABASE_FILENAME', 'value', 'file-mount/data.db'), createObject())]",
               {
                 "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                 "secretRef": "app-insights-connection-string"
