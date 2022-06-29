@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "1778162213574892672"
+      "templateHash": "13445548238364938964"
     }
   },
   "parameters": {
@@ -89,7 +89,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "1894245908383143347"
+              "templateHash": "7534976086947231588"
             }
           },
           "parameters": {
@@ -133,6 +133,10 @@
             "resourceId": {
               "type": "string",
               "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('resourceName'))]"
+            },
+            "resourceName": {
+              "type": "string",
+              "value": "[variables('resourceName')]"
             }
           }
         }
@@ -358,8 +362,8 @@
           "environment": {
             "value": "[parameters('environment')]"
           },
-          "workspaceResourceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')).outputs.resourceId.value]"
+          "workspaceResourceName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')).outputs.resourceName.value]"
           },
           "storageAccountName": {
             "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.storageAccountName.value, '')]"
@@ -375,7 +379,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "16290173842559930945"
+              "templateHash": "14583038772157452812"
             }
           },
           "parameters": {
@@ -406,7 +410,7 @@
                 "description": "If mounting storage, provide the file share name, otherwise leave empty."
               }
             },
-            "workspaceResourceId": {
+            "workspaceResourceName": {
               "type": "string"
             }
           },
@@ -424,7 +428,8 @@
                 "appLogsConfiguration": {
                   "destination": "log-analytics",
                   "logAnalyticsConfiguration": {
-                    "customerId": "[parameters('workspaceResourceId')]"
+                    "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceResourceName')), '2021-12-01-preview').customerId]",
+                    "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceResourceName')), '2021-12-01-preview').primarySharedKey]"
                   }
                 },
                 "zoneRedundant": false
