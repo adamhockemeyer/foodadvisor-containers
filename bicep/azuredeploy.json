@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "6831612331650921238"
+      "templateHash": "1778162213574892672"
     }
   },
   "parameters": {
@@ -255,7 +255,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "3008629918494120594"
+              "templateHash": "13475413972342463910"
             }
           },
           "parameters": {
@@ -286,10 +286,6 @@
                 "Standard_ZRS"
               ]
             },
-            "fileServiceName": {
-              "type": "string",
-              "defaultValue": "containerapp-files"
-            },
             "fileShareName": {
               "type": "string",
               "defaultValue": "containerapp-mount"
@@ -314,23 +310,15 @@
               "tags": "[parameters('tags')]"
             },
             {
-              "type": "Microsoft.Storage/storageAccounts/fileServices",
-              "apiVersion": "2021-09-01",
-              "name": "[format('{0}/{1}', variables('resourceName'), parameters('fileServiceName'))]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('resourceName'))]"
-              ]
-            },
-            {
               "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
               "apiVersion": "2021-09-01",
-              "name": "[format('{0}/{1}/{2}', variables('resourceName'), parameters('fileServiceName'), parameters('fileShareName'))]",
+              "name": "[format('{0}/default/{1}', variables('resourceName'), parameters('fileShareName'))]",
               "properties": {
                 "enabledProtocols": "SMB",
                 "shareQuota": 5
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('resourceName'), parameters('fileServiceName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('resourceName'))]"
               ]
             }
           ],
@@ -341,7 +329,7 @@
             },
             "fileShareName": {
               "type": "string",
-              "value": "[parameters('fileShareName')]"
+              "value": "[format('{0}/default/{1}', variables('resourceName'), parameters('fileShareName'))]"
             }
           }
         }
