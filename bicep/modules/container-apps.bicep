@@ -76,7 +76,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
           storageName: volumeAzureFilesStorageName
         }
       ] : []
-      revisionSuffix: currentUtc
+      revisionSuffix: toLower(currentUtc)
       scale: {
         minReplicas: containerMinReplicas
         maxReplicas: containerMaxRepliacs
