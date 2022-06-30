@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "3871754157874987934"
+      "templateHash": "9053535805572719450"
     }
   },
   "parameters": {
@@ -47,7 +47,7 @@
   },
   "variables": {
     "resourceGroupName": "[format('{0}-rg', parameters('namePrefix'))]",
-    "isSqlite": "[equals(parameters('databaseType'), 'sqlite')]",
+    "isSqlite": false,
     "previewSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment')]",
     "adminJwtSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'admin-jwt-secret')]",
     "apiSaltToken": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'api-salt-token')]",
@@ -686,7 +686,7 @@
                 "managedEnvironmentId": "[parameters('managedEnvironmentId')]",
                 "configuration": {
                   "secrets": "[parameters('secrets')]",
-                  "activeRevisionsMode": "multiple",
+                  "activeRevisionsMode": "Multiple",
                   "ingress": {
                     "external": true,
                     "targetPort": "[parameters('containerTargetPort')]",
@@ -903,7 +903,7 @@
                 "managedEnvironmentId": "[parameters('managedEnvironmentId')]",
                 "configuration": {
                   "secrets": "[parameters('secrets')]",
-                  "activeRevisionsMode": "multiple",
+                  "activeRevisionsMode": "Multiple",
                   "ingress": {
                     "external": true,
                     "targetPort": "[parameters('containerTargetPort')]",
