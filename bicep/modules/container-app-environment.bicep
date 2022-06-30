@@ -14,7 +14,7 @@ param workspaceResourceName string
 var resourceName = '${name}-${environment}-cae'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
-   name: workspaceResourceName
+  name: workspaceResourceName
 }
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
@@ -33,25 +33,27 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01'
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' existing = if(!empty(storageAccountName)) {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' existing = if (!empty(storageAccountName)) {
   name: storageAccountName
 }
 
-resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' existing = if(!empty(fileShareName)) {
+resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' existing = if (!empty(fileShareName)) {
   name: fileShareName
 }
 
-resource containerAppsEnvironmentStorage 'Microsoft.App/managedEnvironments/storages@2022-03-01' = if(storageAccount.id != null && fileShare.id != null) {
+resource containerAppsEnvironmentStorage 'Microsoft.App/managedEnvironments/storages@2022-03-01' = if (storageAccount.id != null && fileShare.id != null) {
   name: 'storage'
   parent: containerAppsEnvironment
   properties: {
     azureFile: {
       accountKey: storageAccount.listKeys().keys[0].value
       accountName: storageAccount.name
-      shareName: fileShare.name
+      //shareName: fileShare.name
+      shareName: 'containerapp-mount'
       accessMode: 'ReadWrite'
     }
   }
 }
 
 output managedEnvironmentId string = containerAppsEnvironment.id
+output environmentStorageName string = containerAppsEnvironmentStorage.name

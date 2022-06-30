@@ -93,7 +93,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     tags: defaultTags
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
     volumeName: isSqlite ? 'azure-files-volume' : ''
-    volumeAzureFilesStorageName: isSqlite ? 'storage' : ''
+    volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
     volumeMountPath: isSqlite ? '/file-mount' : ''
     secrets: [
       {
