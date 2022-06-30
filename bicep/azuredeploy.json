@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "8976508713556642925"
+      "templateHash": "5164899477438771027"
     }
   },
   "parameters": {
@@ -585,7 +585,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "9899240289594824637"
+              "templateHash": "18095801059392636749"
             }
           },
           "parameters": {
@@ -690,7 +690,6 @@
                     "traffic": [
                       {
                         "latestRevision": true,
-                        "revisionName": "[format('{0}-{1}', parameters('name'), parameters('currentUtc'))]",
                         "weight": 100
                       }
                     ],
@@ -714,6 +713,7 @@
                     }
                   ],
                   "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
+                  "revisionSuffix": "[parameters('currentUtc')]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
                     "maxReplicas": "[parameters('containerMaxRepliacs')]"
@@ -802,7 +802,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "9899240289594824637"
+              "templateHash": "18095801059392636749"
             }
           },
           "parameters": {
@@ -907,7 +907,6 @@
                     "traffic": [
                       {
                         "latestRevision": true,
-                        "revisionName": "[format('{0}-{1}', parameters('name'), parameters('currentUtc'))]",
                         "weight": 100
                       }
                     ],
@@ -931,6 +930,7 @@
                     }
                   ],
                   "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
+                  "revisionSuffix": "[parameters('currentUtc')]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
                     "maxReplicas": "[parameters('containerMaxRepliacs')]"
