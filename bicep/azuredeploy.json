@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "5164899477438771027"
+      "templateHash": "16873412524725317462"
     }
   },
   "parameters": {
@@ -585,7 +585,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "18095801059392636749"
+              "templateHash": "17124355223125864905"
             }
           },
           "parameters": {
@@ -713,7 +713,7 @@
                     }
                   ],
                   "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
-                  "revisionSuffix": "[parameters('currentUtc')]",
+                  "revisionSuffix": "[toLower(parameters('currentUtc'))]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
                     "maxReplicas": "[parameters('containerMaxRepliacs')]"
@@ -802,7 +802,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "18095801059392636749"
+              "templateHash": "17124355223125864905"
             }
           },
           "parameters": {
@@ -930,7 +930,7 @@
                     }
                   ],
                   "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
-                  "revisionSuffix": "[parameters('currentUtc')]",
+                  "revisionSuffix": "[toLower(parameters('currentUtc'))]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
                     "maxReplicas": "[parameters('containerMaxRepliacs')]"
