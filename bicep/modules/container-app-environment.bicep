@@ -48,8 +48,7 @@ resource containerAppsEnvironmentStorage 'Microsoft.App/managedEnvironments/stor
     azureFile: {
       accountKey: storageAccount.listKeys().keys[0].value
       accountName: storageAccount.name
-      //shareName: fileShare.name
-      shareName: 'containerapp-mount'
+      shareName: fileShare.name
       accessMode: 'ReadWrite'
     }
   }
