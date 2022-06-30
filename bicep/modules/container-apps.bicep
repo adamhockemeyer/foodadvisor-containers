@@ -34,7 +34,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
     managedEnvironmentId: managedEnvironmentId
     configuration: {
       secrets: secrets
-      activeRevisionsMode: 'multiple'
+      activeRevisionsMode: 'Multiple'
       ingress: {
         external: true
         targetPort: containerTargetPort

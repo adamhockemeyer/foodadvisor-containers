@@ -22,7 +22,8 @@ param defaultTags object = {
 }
 
 var resourceGroupName = '${namePrefix}-rg'
-var isSqlite = databaseType == 'sqlite'
+//var isSqlite = databaseType == 'sqlite'
+var isSqlite = false
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
