@@ -41,6 +41,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
         transport: 'auto'
         traffic: [
           {
+            latestRevision: true
             revisionName: '${name}-${currentUtc}'
             weight: 100
           }

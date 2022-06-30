@@ -16,7 +16,7 @@ param databaseType string = 'sqlite'
 param defaultTags object = {
   Department: 'R&D'
   Environment: environment
-  Updated: utcNow('d')
+  Updated: utcNow()
   ManagedBy: 'Bicep'
   Owner: 'group@org.com'
 }
