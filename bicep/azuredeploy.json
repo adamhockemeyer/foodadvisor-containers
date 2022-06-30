@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "846821351029045511"
+      "templateHash": "8976508713556642925"
     }
   },
   "parameters": {
@@ -39,7 +39,7 @@
       "defaultValue": {
         "Department": "R&D",
         "Environment": "[parameters('environment')]",
-        "Updated": "[utcNow('d')]",
+        "Updated": "[utcNow()]",
         "ManagedBy": "Bicep",
         "Owner": "group@org.com"
       }
@@ -585,7 +585,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "14791662229218018972"
+              "templateHash": "9899240289594824637"
             }
           },
           "parameters": {
@@ -689,6 +689,7 @@
                     "transport": "auto",
                     "traffic": [
                       {
+                        "latestRevision": true,
                         "revisionName": "[format('{0}-{1}', parameters('name'), parameters('currentUtc'))]",
                         "weight": 100
                       }
@@ -801,7 +802,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "14791662229218018972"
+              "templateHash": "9899240289594824637"
             }
           },
           "parameters": {
@@ -905,6 +906,7 @@
                     "transport": "auto",
                     "traffic": [
                       {
+                        "latestRevision": true,
                         "revisionName": "[format('{0}-{1}', parameters('name'), parameters('currentUtc'))]",
                         "weight": 100
                       }
