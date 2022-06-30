@@ -23,7 +23,17 @@ jobs:
         with:
           bicepFilePath: ${{ env.BICEP_PATH }}/main.bicep
           outputFilePath: ${{ env.BICEP_PATH }}/azuredeploy.json
-
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Validate ARM Template
+        uses: azure/arm-deploy@v1
+        with:
+          scope: subscription
+          region: 'eastus'
+          template: ${{ env.BICEP_PATH }}/azuredeploy.json
+          deploymentMode: Validate
       - name: Commit and push changes
         run: |
           git config --global user.name "Github Actions"

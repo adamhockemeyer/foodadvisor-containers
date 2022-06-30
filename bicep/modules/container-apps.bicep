@@ -42,7 +42,6 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
         traffic: [
           {
             latestRevision: true
-            revisionName: '${name}-${currentUtc}'
             weight: 100
           }
         ]
@@ -77,6 +76,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
           storageName: volumeAzureFilesStorageName
         }
       ] : []
+      revisionSuffix: currentUtc
       scale: {
         minReplicas: containerMinReplicas
         maxReplicas: containerMaxRepliacs
