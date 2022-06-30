@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "16873412524725317462"
+      "templateHash": "1304366795819048185"
     }
   },
   "parameters": {
@@ -388,7 +388,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "7853419311376045813"
+              "templateHash": "16027834955522779477"
             }
           },
           "parameters": {
@@ -453,7 +453,7 @@
                 "azureFile": {
                   "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value]",
                   "accountName": "[parameters('storageAccountName')]",
-                  "shareName": "[parameters('fileShareName')]",
+                  "shareName": "containerapp-mount",
                   "accessMode": "ReadWrite"
                 }
               },
@@ -466,6 +466,10 @@
             "managedEnvironmentId": {
               "type": "string",
               "value": "[resourceId('Microsoft.App/managedEnvironments', variables('resourceName'))]"
+            },
+            "environmentStorageName": {
+              "type": "string",
+              "value": "storage"
             }
           }
         }
@@ -506,7 +510,7 @@
             "value": "[if(variables('isSqlite'), 'azure-files-volume', '')]"
           },
           "volumeAzureFilesStorageName": {
-            "value": "[if(variables('isSqlite'), 'storage', '')]"
+            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.environmentStorageName.value, '')]"
           },
           "volumeMountPath": {
             "value": "[if(variables('isSqlite'), '/file-mount', '')]"
