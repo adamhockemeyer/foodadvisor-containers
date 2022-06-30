@@ -22,8 +22,8 @@ param defaultTags object = {
 }
 
 var resourceGroupName = '${namePrefix}-rg'
-//var isSqlite = databaseType == 'sqlite'
-var isSqlite = false
+var isSqlite = databaseType == 'sqlite'
+
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -74,8 +74,8 @@ module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
     environment: environment
     tags: defaultTags
     workspaceResourceName: logAnalytics.outputs.resourceName
-    storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
-    fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''
+    //storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
+    //fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''
   }
 }
 
@@ -93,9 +93,9 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     environment: environment
     tags: defaultTags
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
-    volumeName: isSqlite ? 'azure-files-volume' : ''
-    volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
-    volumeMountPath: isSqlite ? '/file-mount' : ''
+    //volumeName: isSqlite ? 'azure-files-volume' : ''
+    //volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
+    //volumeMountPath: isSqlite ? '/file-mount' : ''
     secrets: [
       {
         name: 'admin-jwt-secret'
@@ -122,10 +122,10 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     containerName: 'strapi'
     containerTargetPort: 1337
     containerEnvironmentVariables: [
-      isSqlite ? {
-        name: 'DATABASE_FILENAME'
-        value: 'file-mount/data.db'
-      } : {}
+      // isSqlite ? {
+      //   name: 'DATABASE_FILENAME'
+      //   value: 'file-mount/data.db'
+      // } : {}
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         secretRef: 'app-insights-connection-string'
