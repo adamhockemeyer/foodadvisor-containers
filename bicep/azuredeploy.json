@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "1304366795819048185"
+      "templateHash": "3871754157874987934"
     }
   },
   "parameters": {
@@ -388,7 +388,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "16027834955522779477"
+              "templateHash": "2198908772768861406"
             }
           },
           "parameters": {
@@ -453,7 +453,7 @@
                 "azureFile": {
                   "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value]",
                   "accountName": "[parameters('storageAccountName')]",
-                  "shareName": "containerapp-mount",
+                  "shareName": "[parameters('fileShareName')]",
                   "accessMode": "ReadWrite"
                 }
               },
