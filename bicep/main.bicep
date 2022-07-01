@@ -1,6 +1,5 @@
 targetScope = 'subscription'
 
-param namePrefix string = 'container-apps-food-${uniqueString(subscription().id)}'
 param location string = deployment().location
 @allowed([
   'dev'
@@ -9,6 +8,7 @@ param location string = deployment().location
   'prod'
 ])
 param environment string = 'dev'
+param namePrefix string = 'container-apps-food-${uniqueString(subscription().id, location, environment)}'
 @allowed([
   'sqlite'
 ])
@@ -23,7 +23,6 @@ param defaultTags object = {
 
 var resourceGroupName = '${namePrefix}-rg'
 var isSqlite = databaseType == 'sqlite'
-
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName

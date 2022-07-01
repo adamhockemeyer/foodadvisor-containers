@@ -11,7 +11,7 @@ param containerName string
 param containerCommand array = []
 param containerTargetPort int
 param containerEnvironmentVariables array = []
-param containerResourcesCPU int = 1
+param containerResourcesCPU string = '1'
 param containerResourcesMemory string = '2Gi'
 @description('If mounting a volume, provide a name along with the volumeMountPath and volumeAzureFilesStorageName')
 param volumeName string = ''
@@ -34,7 +34,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
     managedEnvironmentId: managedEnvironmentId
     configuration: {
       secrets: secrets
-      activeRevisionsMode: 'Multiple'
+      //activeRevisionsMode: 'Multiple'
       ingress: {
         external: true
         targetPort: containerTargetPort
@@ -57,25 +57,25 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
           command: containerCommand
           env: containerEnvironmentVariables
           resources: {
-            cpu: containerResourcesCPU
+            cpu: json(containerResourcesCPU)
             memory: containerResourcesMemory
           }
-          volumeMounts: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
-            {
-              volumeName: volumeName
-              mountPath: volumeMountPath
-            }
-          ] : []
+          // volumeMounts: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
+          //   {
+          //     volumeName: volumeName
+          //     mountPath: volumeMountPath
+          //   }
+          // ] : []
           probes: []
         }
       ]
-      volumes: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
-        {
-          name: volumeName
-          storageType: 'AzureFile'
-          storageName: volumeAzureFilesStorageName
-        }
-      ] : []
+      // volumes: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
+      //   {
+      //     name: volumeName
+      //     storageType: 'AzureFile'
+      //     storageName: volumeAzureFilesStorageName
+      //   }
+      // ] : []
       revisionSuffix: toLower(currentUtc)
       scale: {
         minReplicas: containerMinReplicas
