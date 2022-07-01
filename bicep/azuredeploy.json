@@ -5,14 +5,10 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "11583925703201135924"
+      "templateHash": "16739792659796381964"
     }
   },
   "parameters": {
-    "namePrefix": {
-      "type": "string",
-      "defaultValue": "[format('container-apps-food-{0}', uniqueString(subscription().id))]"
-    },
     "location": {
       "type": "string",
       "defaultValue": "[deployment().location]"
@@ -26,6 +22,10 @@
         "qa",
         "prod"
       ]
+    },
+    "namePrefix": {
+      "type": "string",
+      "defaultValue": "[format('container-apps-food-{0}', uniqueString(subscription().id, parameters('location'), parameters('environment')))]"
     },
     "databaseType": {
       "type": "string",
@@ -551,7 +551,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "17124355223125864905"
+              "templateHash": "4940637967613009591"
             }
           },
           "parameters": {
@@ -593,8 +593,8 @@
               "defaultValue": []
             },
             "containerResourcesCPU": {
-              "type": "int",
-              "defaultValue": 1
+              "type": "string",
+              "defaultValue": "1"
             },
             "containerResourcesMemory": {
               "type": "string",
@@ -648,7 +648,6 @@
                 "managedEnvironmentId": "[parameters('managedEnvironmentId')]",
                 "configuration": {
                   "secrets": "[parameters('secrets')]",
-                  "activeRevisionsMode": "Multiple",
                   "ingress": {
                     "external": true,
                     "targetPort": "[parameters('containerTargetPort')]",
@@ -671,14 +670,12 @@
                       "command": "[parameters('containerCommand')]",
                       "env": "[parameters('containerEnvironmentVariables')]",
                       "resources": {
-                        "cpu": "[parameters('containerResourcesCPU')]",
+                        "cpu": "[json(parameters('containerResourcesCPU'))]",
                         "memory": "[parameters('containerResourcesMemory')]"
                       },
-                      "volumeMounts": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('volumeName', parameters('volumeName'), 'mountPath', parameters('volumeMountPath'))), createArray())]",
                       "probes": []
                     }
                   ],
-                  "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
                   "revisionSuffix": "[toLower(parameters('currentUtc'))]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
@@ -768,7 +765,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "17124355223125864905"
+              "templateHash": "4940637967613009591"
             }
           },
           "parameters": {
@@ -810,8 +807,8 @@
               "defaultValue": []
             },
             "containerResourcesCPU": {
-              "type": "int",
-              "defaultValue": 1
+              "type": "string",
+              "defaultValue": "1"
             },
             "containerResourcesMemory": {
               "type": "string",
@@ -865,7 +862,6 @@
                 "managedEnvironmentId": "[parameters('managedEnvironmentId')]",
                 "configuration": {
                   "secrets": "[parameters('secrets')]",
-                  "activeRevisionsMode": "Multiple",
                   "ingress": {
                     "external": true,
                     "targetPort": "[parameters('containerTargetPort')]",
@@ -888,14 +884,12 @@
                       "command": "[parameters('containerCommand')]",
                       "env": "[parameters('containerEnvironmentVariables')]",
                       "resources": {
-                        "cpu": "[parameters('containerResourcesCPU')]",
+                        "cpu": "[json(parameters('containerResourcesCPU'))]",
                         "memory": "[parameters('containerResourcesMemory')]"
                       },
-                      "volumeMounts": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('volumeName', parameters('volumeName'), 'mountPath', parameters('volumeMountPath'))), createArray())]",
                       "probes": []
                     }
                   ],
-                  "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
                   "revisionSuffix": "[toLower(parameters('currentUtc'))]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
