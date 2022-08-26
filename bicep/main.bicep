@@ -73,8 +73,8 @@ module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
     environment: environment
     tags: defaultTags
     workspaceResourceName: logAnalytics.outputs.resourceName
-    //storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
-    //fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''
+    storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
+    fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''
   }
 }
 
@@ -92,9 +92,9 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     environment: environment
     tags: defaultTags
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
-    //volumeName: isSqlite ? 'azure-files-volume' : ''
-    //volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
-    //volumeMountPath: isSqlite ? '/file-mount' : ''
+    volumeName: isSqlite ? 'azure-files-volume' : ''
+    volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
+    volumeMountPath: isSqlite ? '/file-mount' : ''
     secrets: [
       {
         name: 'admin-jwt-secret'
@@ -178,7 +178,7 @@ module conatinerApp_Frontend 'modules/container-apps.bicep' = {
     containerEnvironmentVariables: [
       {
         name: 'NEXT_PUBLIC_API_URL'
-        value: conatinerApp_Backend.outputs.fqdn
+        value: 'https://${conatinerApp_Backend.outputs.fqdn}'
       }
       {
         name: 'PREVIEW_SECRET'
