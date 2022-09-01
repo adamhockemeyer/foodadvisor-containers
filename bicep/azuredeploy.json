@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.9.1.41621",
-      "templateHash": "14531410808685838580"
+      "templateHash": "4384328875105496568"
     }
   },
   "parameters": {
@@ -517,7 +517,7 @@
             "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.environmentStorageName.value, '')]"
           },
           "volumeMountPath": {
-            "value": "[if(variables('isSqlite'), '/app/volumes/azurefilez', '')]"
+            "value": "[if(variables('isSqlite'), '/volumes/azurefiles', '')]"
           },
           "secrets": {
             "value": [
@@ -554,7 +554,7 @@
           },
           "containerEnvironmentVariables": {
             "value": [
-              "[if(variables('isSqlite'), createObject('name', 'DATABASE_FILENAME', 'value', 'volumes/azurefilez/data.db'), createObject())]",
+              "[if(variables('isSqlite'), createObject('name', 'DATABASE_FILENAME', 'value', '/volumes/azurefiles/data.db'), createObject())]",
               {
                 "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                 "secretRef": "app-insights-connection-string"
