@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.7.4.23292",
-      "templateHash": "16739792659796381964"
+      "version": "0.9.1.41621",
+      "templateHash": "14269752658978289867"
     }
   },
   "parameters": {
@@ -91,8 +91,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.7.4.23292",
-              "templateHash": "7534976086947231588"
+              "version": "0.9.1.41621",
+              "templateHash": "9606525257175392442"
             }
           },
           "parameters": {
@@ -181,8 +181,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.7.4.23292",
-              "templateHash": "3225345315626845877"
+              "version": "0.9.1.41621",
+              "templateHash": "3292539450567361363"
             }
           },
           "parameters": {
@@ -264,8 +264,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.7.4.23292",
-              "templateHash": "13475413972342463910"
+              "version": "0.9.1.41621",
+              "templateHash": "9885584607060950722"
             }
           },
           "parameters": {
@@ -373,6 +373,12 @@
           },
           "workspaceResourceName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')).outputs.resourceName.value]"
+          },
+          "storageAccountName": {
+            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.storageAccountName.value, '')]"
+          },
+          "fileShareName": {
+            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.fileShareName.value, '')]"
           }
         },
         "template": {
@@ -381,8 +387,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.7.4.23292",
-              "templateHash": "300031694348772793"
+              "version": "0.9.1.41621",
+              "templateHash": "6369218914418863126"
             }
           },
           "parameters": {
@@ -437,17 +443,39 @@
                 },
                 "zoneRedundant": false
               }
+            },
+            {
+              "condition": "[and(not(equals(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), null())), not(equals(resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', split(parameters('fileShareName'), '/')[0], split(parameters('fileShareName'), '/')[1], split(parameters('fileShareName'), '/')[2]), null())))]",
+              "type": "Microsoft.App/managedEnvironments/storages",
+              "apiVersion": "2022-03-01",
+              "name": "[format('{0}/{1}', variables('resourceName'), 'storage')]",
+              "properties": {
+                "azureFile": {
+                  "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value]",
+                  "accountName": "[parameters('storageAccountName')]",
+                  "shareName": "[parameters('fileShareName')]",
+                  "accessMode": "ReadWrite"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments', variables('resourceName'))]"
+              ]
             }
           ],
           "outputs": {
             "managedEnvironmentId": {
               "type": "string",
               "value": "[resourceId('Microsoft.App/managedEnvironments', variables('resourceName'))]"
+            },
+            "environmentStorageName": {
+              "type": "string",
+              "value": "storage"
             }
           }
         }
       },
       "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
       ]
@@ -477,6 +505,15 @@
           },
           "managedEnvironmentId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.managedEnvironmentId.value]"
+          },
+          "volumeName": {
+            "value": "[if(variables('isSqlite'), 'azure-files-volume', '')]"
+          },
+          "volumeAzureFilesStorageName": {
+            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.environmentStorageName.value, '')]"
+          },
+          "volumeMountPath": {
+            "value": "[if(variables('isSqlite'), '/file-mount', '')]"
           },
           "secrets": {
             "value": [
@@ -550,8 +587,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.7.4.23292",
-              "templateHash": "4940637967613009591"
+              "version": "0.9.1.41621",
+              "templateHash": "11573460970704654942"
             }
           },
           "parameters": {
@@ -749,7 +786,7 @@
             "value": [
               {
                 "name": "NEXT_PUBLIC_API_URL",
-                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-app-backend')).outputs.fqdn.value]"
+                "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-app-backend')).outputs.fqdn.value)]"
               },
               {
                 "name": "PREVIEW_SECRET",
@@ -764,8 +801,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.7.4.23292",
-              "templateHash": "4940637967613009591"
+              "version": "0.9.1.41621",
+              "templateHash": "11573460970704654942"
             }
           },
           "parameters": {
