@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.9.1.41621",
-      "templateHash": "14269752658978289867"
+      "templateHash": "14531410808685838580"
     }
   },
   "parameters": {
@@ -265,7 +265,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.9.1.41621",
-              "templateHash": "9885584607060950722"
+              "templateHash": "4509674138211431934"
             }
           },
           "parameters": {
@@ -340,6 +340,10 @@
             "fileShareName": {
               "type": "string",
               "value": "[format('{0}/default/{1}', variables('resourceName'), parameters('fileShareName'))]"
+            },
+            "fileShareNameShort": {
+              "type": "string",
+              "value": "[parameters('fileShareName')]"
             }
           }
         }
@@ -378,7 +382,7 @@
             "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.storageAccountName.value, '')]"
           },
           "fileShareName": {
-            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.fileShareName.value, '')]"
+            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.fileShareNameShort.value, '')]"
           }
         },
         "template": {
@@ -388,7 +392,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.9.1.41621",
-              "templateHash": "6369218914418863126"
+              "templateHash": "14591498328676153173"
             }
           },
           "parameters": {
@@ -416,7 +420,7 @@
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "If mounting storage, provide the file share name, otherwise leave empty."
+                "description": "If mounting storage, provide the short file share name, (not accountnam/default/sharename) otherwise leave empty."
               }
             },
             "workspaceResourceName": {
@@ -445,7 +449,7 @@
               }
             },
             {
-              "condition": "[and(not(equals(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), null())), not(equals(resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', split(parameters('fileShareName'), '/')[0], split(parameters('fileShareName'), '/')[1], split(parameters('fileShareName'), '/')[2]), null())))]",
+              "condition": "[and(not(equals(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), null())), not(equals(parameters('fileShareName'), null())))]",
               "type": "Microsoft.App/managedEnvironments/storages",
               "apiVersion": "2022-03-01",
               "name": "[format('{0}/{1}', variables('resourceName'), 'storage')]",
@@ -513,7 +517,7 @@
             "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.environmentStorageName.value, '')]"
           },
           "volumeMountPath": {
-            "value": "[if(variables('isSqlite'), '/file-mount', '')]"
+            "value": "[if(variables('isSqlite'), '/app/volumes/azurefilez', '')]"
           },
           "secrets": {
             "value": [
@@ -550,6 +554,7 @@
           },
           "containerEnvironmentVariables": {
             "value": [
+              "[if(variables('isSqlite'), createObject('name', 'DATABASE_FILENAME', 'value', 'volumes/azurefilez/data.db'), createObject())]",
               {
                 "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                 "secretRef": "app-insights-connection-string"
@@ -588,7 +593,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.9.1.41621",
-              "templateHash": "11573460970704654942"
+              "templateHash": "13726152819736440433"
             }
           },
           "parameters": {
@@ -710,9 +715,11 @@
                         "cpu": "[json(parameters('containerResourcesCPU'))]",
                         "memory": "[parameters('containerResourcesMemory')]"
                       },
+                      "volumeMounts": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('volumeName', parameters('volumeName'), 'mountPath', parameters('volumeMountPath'))), createArray())]",
                       "probes": []
                     }
                   ],
+                  "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
                   "revisionSuffix": "[toLower(parameters('currentUtc'))]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
@@ -802,7 +809,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.9.1.41621",
-              "templateHash": "11573460970704654942"
+              "templateHash": "13726152819736440433"
             }
           },
           "parameters": {
@@ -924,9 +931,11 @@
                         "cpu": "[json(parameters('containerResourcesCPU'))]",
                         "memory": "[parameters('containerResourcesMemory')]"
                       },
+                      "volumeMounts": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('volumeName', parameters('volumeName'), 'mountPath', parameters('volumeMountPath'))), createArray())]",
                       "probes": []
                     }
                   ],
+                  "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
                   "revisionSuffix": "[toLower(parameters('currentUtc'))]",
                   "scale": {
                     "minReplicas": "[parameters('containerMinReplicas')]",
