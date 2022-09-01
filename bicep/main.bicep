@@ -94,7 +94,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
     volumeName: isSqlite ? 'azure-files-volume' : ''
     volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
-    volumeMountPath: isSqlite ? '/app/volumes/azurefilez' : ''
+    volumeMountPath: isSqlite ? '/volumes/azurefiles' : ''
     secrets: [
       {
         name: 'admin-jwt-secret'
@@ -123,7 +123,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     containerEnvironmentVariables: [
       isSqlite ? {
         name: 'DATABASE_FILENAME'
-        value: 'volumes/azurefilez/data.db'
+        value: '/volumes/azurefiles/data.db'
       } : {}
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'

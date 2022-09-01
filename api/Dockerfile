@@ -6,7 +6,7 @@ ADD ./yarn.lock /app
 RUN yarn install --frozen-lockfile
 
 ADD . /app
-RUN yarn seed
+# RUN yarn seed
 
 RUN yarn build
 
