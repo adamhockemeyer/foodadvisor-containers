@@ -60,22 +60,22 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
             cpu: json(containerResourcesCPU)
             memory: containerResourcesMemory
           }
-          // volumeMounts: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
-          //   {
-          //     volumeName: volumeName
-          //     mountPath: volumeMountPath
-          //   }
-          // ] : []
+          volumeMounts: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
+            {
+              volumeName: volumeName
+              mountPath: volumeMountPath
+            }
+          ] : []
           probes: []
         }
       ]
-      // volumes: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
-      //   {
-      //     name: volumeName
-      //     storageType: 'AzureFile'
-      //     storageName: volumeAzureFilesStorageName
-      //   }
-      // ] : []
+      volumes: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
+        {
+          name: volumeName
+          storageType: 'AzureFile'
+          storageName: volumeAzureFilesStorageName
+        }
+      ] : []
       revisionSuffix: toLower(currentUtc)
       scale: {
         minReplicas: containerMinReplicas

@@ -74,7 +74,7 @@ module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
     tags: defaultTags
     workspaceResourceName: logAnalytics.outputs.resourceName
     storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
-    fileShareName: isSqlite ? fileStorage.outputs.fileShareName : ''
+    fileShareName: isSqlite ? fileStorage.outputs.fileShareNameShort : ''
   }
 }
 
@@ -94,7 +94,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
     volumeName: isSqlite ? 'azure-files-volume' : ''
     volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
-    volumeMountPath: isSqlite ? '/file-mount' : ''
+    volumeMountPath: isSqlite ? '/app/volumes/azurefilez' : ''
     secrets: [
       {
         name: 'admin-jwt-secret'
@@ -121,10 +121,10 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     containerName: 'strapi'
     containerTargetPort: 1337
     containerEnvironmentVariables: [
-      // isSqlite ? {
-      //   name: 'DATABASE_FILENAME'
-      //   value: 'file-mount/data.db'
-      // } : {}
+      isSqlite ? {
+        name: 'DATABASE_FILENAME'
+        value: 'volumes/azurefilez/data.db'
+      } : {}
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         secretRef: 'app-insights-connection-string'

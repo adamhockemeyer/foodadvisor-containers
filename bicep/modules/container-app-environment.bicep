@@ -6,7 +6,7 @@ param environment string
 param tags object = {}
 @description('If mounting storage, include the storage account name, otherwise leave empty.')
 param storageAccountName string = ''
-@description('If mounting storage, provide the file share name, otherwise leave empty.')
+@description('If mounting storage, provide the short file share name, (not accountnam/default/sharename) otherwise leave empty.')
 param fileShareName string = ''
 
 param workspaceResourceName string
@@ -37,18 +37,15 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' existing 
   name: storageAccountName
 }
 
-resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' existing = if (!empty(fileShareName)) {
-  name: fileShareName
-}
-
-resource containerAppsEnvironmentStorage 'Microsoft.App/managedEnvironments/storages@2022-03-01' = if (storageAccount.id != null && fileShare.id != null) {
+resource containerAppsEnvironmentStorage 'Microsoft.App/managedEnvironments/storages@2022-03-01' = if (storageAccount.id != null && fileShareName != null) {
   name: 'storage'
   parent: containerAppsEnvironment
   properties: {
     azureFile: {
       accountKey: storageAccount.listKeys().keys[0].value
       accountName: storageAccount.name
-      shareName: fileShare.name
+      // The short name, not the full accountname/default/sharename
+      shareName: fileShareName
       accessMode: 'ReadWrite'
     }
   }
