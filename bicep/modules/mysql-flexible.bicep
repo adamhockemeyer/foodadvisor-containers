@@ -5,7 +5,8 @@ param location string
 param environment string
 param tags object = {}
 
-param skuName string = 'B1ms'
+@description('The name of the SKU found via az mysql flexible-server list-skus -l eastus -o table')
+param skuName string = 'Standard_B1ms'
 
 param adminLogin string
 @secure()
