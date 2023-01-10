@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.13.1.58284",
-      "templateHash": "2771210824777685191"
+      "templateHash": "6671165729946759898"
     }
   },
   "parameters": {
@@ -40,7 +40,7 @@
   },
   "variables": {
     "resourceGroupName": "[format('{0}-rg', parameters('namePrefix'))]",
-    "mysqlAdminLogin": "sa",
+    "mysqlAdminLogin": "mysqladmin",
     "mySqlAdminPassword": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'mysql-admin-password')]",
     "previewSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment')]",
     "adminJwtSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'admin-jwt-secret')]",
