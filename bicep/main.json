@@ -1,0 +1,966 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.13.1.58284",
+      "templateHash": "14086833989643693195"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[deployment().location]"
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "test",
+        "qa",
+        "prod"
+      ]
+    },
+    "namePrefix": {
+      "type": "string",
+      "defaultValue": "[format('container-apps-food-{0}', uniqueString(subscription().id, parameters('location'), parameters('environment')))]"
+    },
+    "defaultTags": {
+      "type": "object",
+      "defaultValue": {
+        "Department": "R&D",
+        "Environment": "[parameters('environment')]",
+        "Updated": "[utcNow()]",
+        "ManagedBy": "Bicep",
+        "Owner": "group@org.com"
+      }
+    }
+  },
+  "variables": {
+    "resourceGroupName": "[format('{0}-rg', parameters('namePrefix'))]",
+    "mySqlAdminLogin": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'mysql-admin')]",
+    "mySqlAdminPassword": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'mysql-admin-password')]",
+    "previewSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment')]",
+    "adminJwtSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'admin-jwt-secret')]",
+    "apiSaltToken": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'api-salt-token')]",
+    "jwtSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'jwt-secret')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('resourceGroupName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('defaultTags')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "log-analytics-workspace",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('namePrefix')]"
+          },
+          "location": {
+            "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), '2021-04-01', 'full').location]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "742198321138979597"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "environment": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "PerGB2018"
+            }
+          },
+          "variables": {
+            "resourceName": "[format('{0}-{1}-workspace', parameters('name'), parameters('environment'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2021-12-01-preview",
+              "name": "[variables('resourceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": {
+                  "name": "[parameters('skuName')]"
+                },
+                "retentionInDays": 30
+              }
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('resourceName'))]"
+            },
+            "resourceName": {
+              "type": "string",
+              "value": "[variables('resourceName')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "application-insights",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('namePrefix')]"
+          },
+          "location": {
+            "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), '2021-04-01', 'full').location]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
+          },
+          "workspaceResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace'), '2020-10-01').outputs.resourceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "2422122432564726410"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "environment": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "workspaceResourceId": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "resourceName": "[format('{0}-{1}-ai', parameters('name'), parameters('environment'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[variables('resourceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "web",
+              "properties": {
+                "Application_Type": "web",
+                "WorkspaceResourceId": "[parameters('workspaceResourceId')]"
+              }
+            }
+          ],
+          "outputs": {
+            "connectionString": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('resourceName')), '2020-02-02').ConnectionString]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "mysql",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('namePrefix')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
+          },
+          "adminLogin": {
+            "value": "[variables('mySqlAdminLogin')]"
+          },
+          "adminPassword": {
+            "value": "[variables('mySqlAdminPassword')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "4649768126601611963"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "environment": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "B1ms"
+            },
+            "adminLogin": {
+              "type": "string"
+            },
+            "adminPassword": {
+              "type": "secureString"
+            },
+            "databaseName": {
+              "type": "string",
+              "defaultValue": "strapi"
+            }
+          },
+          "variables": {
+            "resourceName": "[format('{0}-{1}-mysql', parameters('name'), parameters('environment'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.DBforMySQL/flexibleServers",
+              "apiVersion": "2021-12-01-preview",
+              "name": "[variables('resourceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "Burstable"
+              },
+              "properties": {
+                "administratorLogin": "[parameters('adminLogin')]",
+                "administratorLoginPassword": "[parameters('adminPassword')]"
+              }
+            },
+            {
+              "type": "Microsoft.DBforMySQL/flexibleServers/databases",
+              "apiVersion": "2021-12-01-preview",
+              "name": "[format('{0}/{1}', variables('resourceName'), parameters('databaseName'))]",
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/flexibleServers', variables('resourceName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.DBforMySQL/flexibleServers', variables('resourceName')), '2021-12-01-preview').fullyQualifiedDomainName]"
+            },
+            "databaseName": {
+              "type": "string",
+              "value": "[parameters('databaseName')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "container-apps-environment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('namePrefix')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
+          },
+          "workspaceResourceName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace'), '2020-10-01').outputs.resourceName.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "463865945450893073"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "environment": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "storageAccountName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If mounting storage, include the storage account name, otherwise leave empty."
+              }
+            },
+            "fileShareName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If mounting storage, provide the short file share name, (not accountnam/default/sharename) otherwise leave empty."
+              }
+            },
+            "workspaceResourceName": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "resourceName": "[format('{0}-{1}-cae', parameters('name'), parameters('environment'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/managedEnvironments",
+              "apiVersion": "2022-03-01",
+              "name": "[variables('resourceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "appLogsConfiguration": {
+                  "destination": "log-analytics",
+                  "logAnalyticsConfiguration": {
+                    "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceResourceName')), '2021-12-01-preview').customerId]",
+                    "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceResourceName')), '2021-12-01-preview').primarySharedKey]"
+                  }
+                },
+                "zoneRedundant": false
+              }
+            },
+            {
+              "condition": "[and(not(equals(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), null())), not(equals(parameters('fileShareName'), null())))]",
+              "type": "Microsoft.App/managedEnvironments/storages",
+              "apiVersion": "2022-03-01",
+              "name": "[format('{0}/{1}', variables('resourceName'), 'storage')]",
+              "properties": {
+                "azureFile": {
+                  "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value]",
+                  "accountName": "[parameters('storageAccountName')]",
+                  "shareName": "[parameters('fileShareName')]",
+                  "accessMode": "ReadWrite"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments', variables('resourceName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "managedEnvironmentId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/managedEnvironments', variables('resourceName'))]"
+            },
+            "environmentStorageName": {
+              "type": "string",
+              "value": "storage"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "container-app-backend",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "backend"
+          },
+          "location": {
+            "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), '2021-04-01', 'full').location]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
+          },
+          "managedEnvironmentId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment'), '2020-10-01').outputs.managedEnvironmentId.value]"
+          },
+          "secrets": {
+            "value": [
+              {
+                "name": "mysql-admin-login",
+                "value": "[variables('mySqlAdminLogin')]"
+              },
+              {
+                "name": "mysql-admin-password",
+                "value": "[variables('mySqlAdminPassword')]"
+              },
+              {
+                "name": "admin-jwt-secret",
+                "value": "[variables('adminJwtSecret')]"
+              },
+              {
+                "name": "api-salt-token",
+                "value": "[variables('apiSaltToken')]"
+              },
+              {
+                "name": "jwt-secret",
+                "value": "[variables('jwtSecret')]"
+              },
+              {
+                "name": "strapi-admin-client-preview-secret",
+                "value": "[variables('previewSecret')]"
+              },
+              {
+                "name": "app-insights-connection-string",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'application-insights'), '2020-10-01').outputs.connectionString.value]"
+              }
+            ]
+          },
+          "containerImage": {
+            "value": "ghcr.io/adamhockemeyer/foodadvisor-containers-api:master"
+          },
+          "containerName": {
+            "value": "strapi"
+          },
+          "containerTargetPort": {
+            "value": 1337
+          },
+          "containerEnvironmentVariables": {
+            "value": [
+              {
+                "name": "DATABASE_HOST",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'mysql'), '2020-10-01').outputs.fqdn.value]"
+              },
+              {
+                "name": "DATABASE_PORT",
+                "value": "3306"
+              },
+              {
+                "name": "DATABASE_NAME",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'mysql'), '2020-10-01').outputs.databaseName.value]"
+              },
+              {
+                "name": "DATABASE_USERNAME",
+                "secretRef": "mysql-admin-login"
+              },
+              {
+                "name": "DATABASE_PASSWORD",
+                "secretRef": "mysql-admin-password"
+              },
+              {
+                "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                "secretRef": "app-insights-connection-string"
+              },
+              {
+                "name": "STRAPI_ADMIN_CLIENT_URL",
+                "value": "TBD"
+              },
+              {
+                "name": "STRAPI_ADMIN_CLIENT_PREVIEW_SECRET",
+                "secretRef": "strapi-admin-client-preview-secret"
+              },
+              {
+                "name": "PORT",
+                "value": "1337"
+              },
+              {
+                "name": "API_TOKEN_SALT",
+                "secretRef": "api-salt-token"
+              },
+              {
+                "name": "JWT_SECRET",
+                "secretRef": "jwt-secret"
+              },
+              {
+                "name": "ADMIN_JWT_SECRET",
+                "secretRef": "admin-jwt-secret"
+              }
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "10793199722338113467"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "environment": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "managedEnvironmentId": {
+              "type": "string"
+            },
+            "secrets": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "containerImage": {
+              "type": "string"
+            },
+            "containerName": {
+              "type": "string"
+            },
+            "containerCommand": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "containerTargetPort": {
+              "type": "int"
+            },
+            "containerEnvironmentVariables": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "containerResourcesCPU": {
+              "type": "string",
+              "defaultValue": "1"
+            },
+            "containerResourcesMemory": {
+              "type": "string",
+              "defaultValue": "2Gi"
+            },
+            "volumeName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If mounting a volume, provide a name along with the volumeMountPath and volumeAzureFilesStorageName"
+              }
+            },
+            "volumeMountPath": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If using sqlite, we can mount a volume to the container for persistant storage."
+              }
+            },
+            "volumeAzureFilesStorageName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If using sqlite, we can mount Azure Files as a volume to mount."
+              }
+            },
+            "containerMinReplicas": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "containerMaxRepliacs": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "currentUtc": {
+              "type": "string",
+              "defaultValue": "[utcNow()]"
+            }
+          },
+          "variables": {
+            "resourceName": "[format('{0}-{1}-ca', parameters('name'), parameters('environment'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2022-03-01",
+              "name": "[variables('resourceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "managedEnvironmentId": "[parameters('managedEnvironmentId')]",
+                "configuration": {
+                  "secrets": "[parameters('secrets')]",
+                  "ingress": {
+                    "external": true,
+                    "targetPort": "[parameters('containerTargetPort')]",
+                    "transport": "auto",
+                    "traffic": [
+                      {
+                        "latestRevision": true,
+                        "weight": 100
+                      }
+                    ],
+                    "allowInsecure": false
+                  },
+                  "registries": []
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "image": "[parameters('containerImage')]",
+                      "name": "[parameters('containerName')]",
+                      "command": "[parameters('containerCommand')]",
+                      "env": "[parameters('containerEnvironmentVariables')]",
+                      "resources": {
+                        "cpu": "[json(parameters('containerResourcesCPU'))]",
+                        "memory": "[parameters('containerResourcesMemory')]"
+                      },
+                      "volumeMounts": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('volumeName', parameters('volumeName'), 'mountPath', parameters('volumeMountPath'))), createArray())]",
+                      "probes": []
+                    }
+                  ],
+                  "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
+                  "revisionSuffix": "[toLower(parameters('currentUtc'))]",
+                  "scale": {
+                    "minReplicas": "[parameters('containerMinReplicas')]",
+                    "maxReplicas": "[parameters('containerMaxRepliacs')]"
+                  }
+                }
+              },
+              "identity": {
+                "type": "None"
+              }
+            }
+          ],
+          "outputs": {
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('resourceName')), '2022-03-01').configuration.ingress.fqdn]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'application-insights')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'mysql')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "container-app-frontend",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "frontend"
+          },
+          "location": {
+            "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), '2021-04-01', 'full').location]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "tags": {
+            "value": "[parameters('defaultTags')]"
+          },
+          "managedEnvironmentId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment'), '2020-10-01').outputs.managedEnvironmentId.value]"
+          },
+          "secrets": {
+            "value": [
+              {
+                "name": "preview-secret",
+                "value": "[variables('previewSecret')]"
+              }
+            ]
+          },
+          "containerImage": {
+            "value": "ghcr.io/adamhockemeyer/foodadvisor-containers-client:master"
+          },
+          "containerName": {
+            "value": "frontend"
+          },
+          "containerTargetPort": {
+            "value": 3000
+          },
+          "containerEnvironmentVariables": {
+            "value": [
+              {
+                "name": "NEXT_PUBLIC_API_URL",
+                "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-app-backend'), '2020-10-01').outputs.fqdn.value)]"
+              },
+              {
+                "name": "PREVIEW_SECRET",
+                "secretRef": "preview-secret"
+              }
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "10793199722338113467"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "environment": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "managedEnvironmentId": {
+              "type": "string"
+            },
+            "secrets": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "containerImage": {
+              "type": "string"
+            },
+            "containerName": {
+              "type": "string"
+            },
+            "containerCommand": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "containerTargetPort": {
+              "type": "int"
+            },
+            "containerEnvironmentVariables": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "containerResourcesCPU": {
+              "type": "string",
+              "defaultValue": "1"
+            },
+            "containerResourcesMemory": {
+              "type": "string",
+              "defaultValue": "2Gi"
+            },
+            "volumeName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If mounting a volume, provide a name along with the volumeMountPath and volumeAzureFilesStorageName"
+              }
+            },
+            "volumeMountPath": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If using sqlite, we can mount a volume to the container for persistant storage."
+              }
+            },
+            "volumeAzureFilesStorageName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "If using sqlite, we can mount Azure Files as a volume to mount."
+              }
+            },
+            "containerMinReplicas": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "containerMaxRepliacs": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "currentUtc": {
+              "type": "string",
+              "defaultValue": "[utcNow()]"
+            }
+          },
+          "variables": {
+            "resourceName": "[format('{0}-{1}-ca', parameters('name'), parameters('environment'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2022-03-01",
+              "name": "[variables('resourceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "managedEnvironmentId": "[parameters('managedEnvironmentId')]",
+                "configuration": {
+                  "secrets": "[parameters('secrets')]",
+                  "ingress": {
+                    "external": true,
+                    "targetPort": "[parameters('containerTargetPort')]",
+                    "transport": "auto",
+                    "traffic": [
+                      {
+                        "latestRevision": true,
+                        "weight": 100
+                      }
+                    ],
+                    "allowInsecure": false
+                  },
+                  "registries": []
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "image": "[parameters('containerImage')]",
+                      "name": "[parameters('containerName')]",
+                      "command": "[parameters('containerCommand')]",
+                      "env": "[parameters('containerEnvironmentVariables')]",
+                      "resources": {
+                        "cpu": "[json(parameters('containerResourcesCPU'))]",
+                        "memory": "[parameters('containerResourcesMemory')]"
+                      },
+                      "volumeMounts": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('volumeName', parameters('volumeName'), 'mountPath', parameters('volumeMountPath'))), createArray())]",
+                      "probes": []
+                    }
+                  ],
+                  "volumes": "[if(and(and(not(empty(parameters('volumeAzureFilesStorageName'))), not(empty(parameters('volumeMountPath')))), not(empty(parameters('volumeName')))), createArray(createObject('name', parameters('volumeName'), 'storageType', 'AzureFile', 'storageName', parameters('volumeAzureFilesStorageName'))), createArray())]",
+                  "revisionSuffix": "[toLower(parameters('currentUtc'))]",
+                  "scale": {
+                    "minReplicas": "[parameters('containerMinReplicas')]",
+                    "maxReplicas": "[parameters('containerMaxRepliacs')]"
+                  }
+                }
+              },
+              "identity": {
+                "type": "None"
+              }
+            }
+          ],
+          "outputs": {
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('resourceName')), '2022-03-01').configuration.ingress.fqdn]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-app-backend')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    }
+  ]
+}

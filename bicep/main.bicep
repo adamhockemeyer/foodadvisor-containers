@@ -9,10 +9,7 @@ param location string = deployment().location
 ])
 param environment string = 'dev'
 param namePrefix string = 'container-apps-food-${uniqueString(subscription().id, location, environment)}'
-@allowed([
-  'sqlite'
-])
-param databaseType string = 'sqlite'
+
 param defaultTags object = {
   Department: 'R&D'
   Environment: environment
@@ -22,7 +19,6 @@ param defaultTags object = {
 }
 
 var resourceGroupName = '${namePrefix}-rg'
-var isSqlite = databaseType == 'sqlite'
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -53,14 +49,20 @@ module applicationInsights 'modules/app-insights.bicep' = {
   }
 }
 
-module fileStorage 'modules/file-storage.bicep' = if (isSqlite) {
-  name: 'file-storage'
+// For demo purposes, we are using a MySQL database. In a production environment, you should use more secure credentials.
+var mySqlAdminLogin = uniqueString(rg.id, environment, 'mysql-admin')
+var mySqlAdminPassword = uniqueString(rg.id, environment, 'mysql-admin-password')
+
+module mysql 'modules/mysql-flexible.bicep' = {
   scope: rg
+  name: 'mysql'
   params: {
     name: namePrefix
     location: location
     environment: environment
     tags: defaultTags
+    adminLogin: mySqlAdminLogin
+    adminPassword: mySqlAdminPassword
   }
 }
 
@@ -73,8 +75,6 @@ module containerAppsEnvironment 'modules/container-app-environment.bicep' = {
     environment: environment
     tags: defaultTags
     workspaceResourceName: logAnalytics.outputs.resourceName
-    storageAccountName: isSqlite ? fileStorage.outputs.storageAccountName : ''
-    fileShareName: isSqlite ? fileStorage.outputs.fileShareNameShort : ''
   }
 }
 
@@ -92,10 +92,15 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     environment: environment
     tags: defaultTags
     managedEnvironmentId: containerAppsEnvironment.outputs.managedEnvironmentId
-    volumeName: isSqlite ? 'azure-files-volume' : ''
-    volumeAzureFilesStorageName: isSqlite ? containerAppsEnvironment.outputs.environmentStorageName : ''
-    volumeMountPath: isSqlite ? '/volumes/azurefiles' : ''
     secrets: [
+      {
+        name: 'mysql-admin-login'
+        value: mySqlAdminLogin
+      }
+      {
+        name: 'mysql-admin-password'
+        value: mySqlAdminPassword
+      }
       {
         name: 'admin-jwt-secret'
         value: adminJwtSecret
@@ -121,10 +126,26 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     containerName: 'strapi'
     containerTargetPort: 1337
     containerEnvironmentVariables: [
-      isSqlite ? {
-        name: 'DATABASE_FILENAME'
-        value: '/volumes/azurefiles/data.db'
-      } : {}
+      {
+        name: 'DATABASE_HOST'
+        value: mysql.outputs.fqdn
+      }
+      {
+        name: 'DATABASE_PORT'
+        value: '3306'
+      }
+      {
+        name: 'DATABASE_NAME'
+        value: mysql.outputs.databaseName
+      }
+      {
+        name: 'DATABASE_USERNAME'
+        secretRef: 'mysql-admin-login'
+      }
+      {
+        name: 'DATABASE_PASSWORD'
+        secretRef: 'mysql-admin-password'
+      }
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         secretRef: 'app-insights-connection-string'
