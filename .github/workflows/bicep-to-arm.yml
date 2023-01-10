@@ -41,4 +41,4 @@ jobs:
 
           git add ./bicep/azuredeploy.json
           git commit -m "Add generated ARM template"
-          git push
+          git push --force
