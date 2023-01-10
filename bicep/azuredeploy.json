@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.9.1.41621",
-      "templateHash": "4384328875105496568"
+      "version": "0.13.1.58284",
+      "templateHash": "14086833989643693195"
     }
   },
   "parameters": {
@@ -27,13 +27,6 @@
       "type": "string",
       "defaultValue": "[format('container-apps-food-{0}', uniqueString(subscription().id, parameters('location'), parameters('environment')))]"
     },
-    "databaseType": {
-      "type": "string",
-      "defaultValue": "sqlite",
-      "allowedValues": [
-        "sqlite"
-      ]
-    },
     "defaultTags": {
       "type": "object",
       "defaultValue": {
@@ -47,7 +40,8 @@
   },
   "variables": {
     "resourceGroupName": "[format('{0}-rg', parameters('namePrefix'))]",
-    "isSqlite": "[equals(parameters('databaseType'), 'sqlite')]",
+    "mySqlAdminLogin": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'mysql-admin')]",
+    "mySqlAdminPassword": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'mysql-admin-password')]",
     "previewSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment')]",
     "adminJwtSecret": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'admin-jwt-secret')]",
     "apiSaltToken": "[uniqueString(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName')), parameters('environment'), 'container-apps-environment', 'api-salt-token')]",
@@ -91,8 +85,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.9.1.41621",
-              "templateHash": "9606525257175392442"
+              "version": "0.13.1.58284",
+              "templateHash": "742198321138979597"
             }
           },
           "parameters": {
@@ -172,7 +166,7 @@
             "value": "[parameters('defaultTags')]"
           },
           "workspaceResourceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')).outputs.resourceId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace'), '2020-10-01').outputs.resourceId.value]"
           }
         },
         "template": {
@@ -181,8 +175,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.9.1.41621",
-              "templateHash": "3292539450567361363"
+              "version": "0.13.1.58284",
+              "templateHash": "2422122432564726410"
             }
           },
           "parameters": {
@@ -223,7 +217,7 @@
           "outputs": {
             "connectionString": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Insights/components', variables('resourceName'))).ConnectionString]"
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('resourceName')), '2020-02-02').ConnectionString]"
             }
           }
         }
@@ -234,10 +228,9 @@
       ]
     },
     {
-      "condition": "[variables('isSqlite')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "file-storage",
+      "name": "mysql",
       "resourceGroup": "[variables('resourceGroupName')]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -256,6 +249,12 @@
           },
           "tags": {
             "value": "[parameters('defaultTags')]"
+          },
+          "adminLogin": {
+            "value": "[variables('mySqlAdminLogin')]"
+          },
+          "adminPassword": {
+            "value": "[variables('mySqlAdminPassword')]"
           }
         },
         "template": {
@@ -264,8 +263,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.9.1.41621",
-              "templateHash": "4509674138211431934"
+              "version": "0.13.1.58284",
+              "templateHash": "4649768126601611963"
             }
           },
           "parameters": {
@@ -282,68 +281,57 @@
               "type": "object",
               "defaultValue": {}
             },
-            "sku": {
+            "skuName": {
               "type": "string",
-              "defaultValue": "Standard_GZRS",
-              "allowedValues": [
-                "Premium_LRS",
-                "Premium_ZRS",
-                "Standard_GRS",
-                "Standard_GZRS",
-                "Standard_LRS",
-                "Standard_RAGRS",
-                "Standard_RAGZRS",
-                "Standard_ZRS"
-              ]
+              "defaultValue": "B1ms"
             },
-            "fileShareName": {
+            "adminLogin": {
+              "type": "string"
+            },
+            "adminPassword": {
+              "type": "secureString"
+            },
+            "databaseName": {
               "type": "string",
-              "defaultValue": "containerapp-mount"
+              "defaultValue": "strapi"
             }
           },
           "variables": {
-            "resourceName": "[substring(replace(format('{0}-{1}-sa', parameters('name'), parameters('environment')), '-', ''), 0, 24)]"
+            "resourceName": "[format('{0}-{1}-mysql', parameters('name'), parameters('environment'))]"
           },
           "resources": [
             {
-              "type": "Microsoft.Storage/storageAccounts",
-              "apiVersion": "2021-09-01",
+              "type": "Microsoft.DBforMySQL/flexibleServers",
+              "apiVersion": "2021-12-01-preview",
               "name": "[variables('resourceName')]",
               "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
               "sku": {
-                "name": "[parameters('sku')]"
+                "name": "[parameters('skuName')]",
+                "tier": "Burstable"
               },
               "properties": {
-                "allowBlobPublicAccess": false
-              },
-              "kind": "StorageV2",
-              "tags": "[parameters('tags')]"
+                "administratorLogin": "[parameters('adminLogin')]",
+                "administratorLoginPassword": "[parameters('adminPassword')]"
+              }
             },
             {
-              "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-              "apiVersion": "2021-09-01",
-              "name": "[format('{0}/default/{1}', variables('resourceName'), parameters('fileShareName'))]",
-              "properties": {
-                "enabledProtocols": "SMB",
-                "shareQuota": 5
-              },
+              "type": "Microsoft.DBforMySQL/flexibleServers/databases",
+              "apiVersion": "2021-12-01-preview",
+              "name": "[format('{0}/{1}', variables('resourceName'), parameters('databaseName'))]",
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('resourceName'))]"
+                "[resourceId('Microsoft.DBforMySQL/flexibleServers', variables('resourceName'))]"
               ]
             }
           ],
           "outputs": {
-            "storageAccountName": {
+            "fqdn": {
               "type": "string",
-              "value": "[variables('resourceName')]"
+              "value": "[reference(resourceId('Microsoft.DBforMySQL/flexibleServers', variables('resourceName')), '2021-12-01-preview').fullyQualifiedDomainName]"
             },
-            "fileShareName": {
+            "databaseName": {
               "type": "string",
-              "value": "[format('{0}/default/{1}', variables('resourceName'), parameters('fileShareName'))]"
-            },
-            "fileShareNameShort": {
-              "type": "string",
-              "value": "[parameters('fileShareName')]"
+              "value": "[parameters('databaseName')]"
             }
           }
         }
@@ -376,13 +364,7 @@
             "value": "[parameters('defaultTags')]"
           },
           "workspaceResourceName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')).outputs.resourceName.value]"
-          },
-          "storageAccountName": {
-            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.storageAccountName.value, '')]"
-          },
-          "fileShareName": {
-            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage'), '2020-10-01').outputs.fileShareNameShort.value, '')]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace'), '2020-10-01').outputs.resourceName.value]"
           }
         },
         "template": {
@@ -391,8 +373,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.9.1.41621",
-              "templateHash": "14591498328676153173"
+              "version": "0.13.1.58284",
+              "templateHash": "463865945450893073"
             }
           },
           "parameters": {
@@ -479,7 +461,6 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'file-storage')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'log-analytics-workspace')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
       ]
@@ -508,19 +489,18 @@
             "value": "[parameters('defaultTags')]"
           },
           "managedEnvironmentId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.managedEnvironmentId.value]"
-          },
-          "volumeName": {
-            "value": "[if(variables('isSqlite'), 'azure-files-volume', '')]"
-          },
-          "volumeAzureFilesStorageName": {
-            "value": "[if(variables('isSqlite'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.environmentStorageName.value, '')]"
-          },
-          "volumeMountPath": {
-            "value": "[if(variables('isSqlite'), '/volumes/azurefiles', '')]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment'), '2020-10-01').outputs.managedEnvironmentId.value]"
           },
           "secrets": {
             "value": [
+              {
+                "name": "mysql-admin-login",
+                "value": "[variables('mySqlAdminLogin')]"
+              },
+              {
+                "name": "mysql-admin-password",
+                "value": "[variables('mySqlAdminPassword')]"
+              },
               {
                 "name": "admin-jwt-secret",
                 "value": "[variables('adminJwtSecret')]"
@@ -539,7 +519,7 @@
               },
               {
                 "name": "app-insights-connection-string",
-                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'application-insights')).outputs.connectionString.value]"
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'application-insights'), '2020-10-01').outputs.connectionString.value]"
               }
             ]
           },
@@ -554,7 +534,26 @@
           },
           "containerEnvironmentVariables": {
             "value": [
-              "[if(variables('isSqlite'), createObject('name', 'DATABASE_FILENAME', 'value', '/volumes/azurefiles/data.db'), createObject())]",
+              {
+                "name": "DATABASE_HOST",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'mysql'), '2020-10-01').outputs.fqdn.value]"
+              },
+              {
+                "name": "DATABASE_PORT",
+                "value": "3306"
+              },
+              {
+                "name": "DATABASE_NAME",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'mysql'), '2020-10-01').outputs.databaseName.value]"
+              },
+              {
+                "name": "DATABASE_USERNAME",
+                "secretRef": "mysql-admin-login"
+              },
+              {
+                "name": "DATABASE_PASSWORD",
+                "secretRef": "mysql-admin-password"
+              },
               {
                 "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                 "secretRef": "app-insights-connection-string"
@@ -592,8 +591,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.9.1.41621",
-              "templateHash": "13726152819736440433"
+              "version": "0.13.1.58284",
+              "templateHash": "10793199722338113467"
             }
           },
           "parameters": {
@@ -735,7 +734,7 @@
           "outputs": {
             "fqdn": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('resourceName'))).configuration.ingress.fqdn]"
+              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('resourceName')), '2022-03-01').configuration.ingress.fqdn]"
             }
           }
         }
@@ -743,6 +742,7 @@
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'application-insights')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'mysql')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
       ]
     },
@@ -770,7 +770,7 @@
             "value": "[parameters('defaultTags')]"
           },
           "managedEnvironmentId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment')).outputs.managedEnvironmentId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-apps-environment'), '2020-10-01').outputs.managedEnvironmentId.value]"
           },
           "secrets": {
             "value": [
@@ -793,7 +793,7 @@
             "value": [
               {
                 "name": "NEXT_PUBLIC_API_URL",
-                "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-app-backend')).outputs.fqdn.value)]"
+                "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'container-app-backend'), '2020-10-01').outputs.fqdn.value)]"
               },
               {
                 "name": "PREVIEW_SECRET",
@@ -808,8 +808,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.9.1.41621",
-              "templateHash": "13726152819736440433"
+              "version": "0.13.1.58284",
+              "templateHash": "10793199722338113467"
             }
           },
           "parameters": {
@@ -951,7 +951,7 @@
           "outputs": {
             "fqdn": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('resourceName'))).configuration.ingress.fqdn]"
+              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('resourceName')), '2022-03-01').configuration.ingress.fqdn]"
             }
           }
         }
