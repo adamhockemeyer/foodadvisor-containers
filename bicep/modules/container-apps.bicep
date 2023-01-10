@@ -13,12 +13,6 @@ param containerTargetPort int
 param containerEnvironmentVariables array = []
 param containerResourcesCPU string = '1'
 param containerResourcesMemory string = '2Gi'
-@description('If mounting a volume, provide a name along with the volumeMountPath and volumeAzureFilesStorageName')
-param volumeName string = ''
-@description('If using sqlite, we can mount a volume to the container for persistant storage.')
-param volumeMountPath string = ''
-@description('If using sqlite, we can mount Azure Files as a volume to mount.')
-param volumeAzureFilesStorageName string = ''
 param containerMinReplicas int = 1
 param containerMaxRepliacs int = 1
 
@@ -60,22 +54,9 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
             cpu: json(containerResourcesCPU)
             memory: containerResourcesMemory
           }
-          volumeMounts: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
-            {
-              volumeName: volumeName
-              mountPath: volumeMountPath
-            }
-          ] : []
           probes: []
         }
       ]
-      volumes: (!empty(volumeAzureFilesStorageName) && !empty(volumeMountPath) && !empty(volumeName)) ? [
-        {
-          name: volumeName
-          storageType: 'AzureFile'
-          storageName: volumeAzureFilesStorageName
-        }
-      ] : []
       revisionSuffix: toLower(currentUtc)
       scale: {
         minReplicas: containerMinReplicas

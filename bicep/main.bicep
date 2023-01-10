@@ -50,7 +50,7 @@ module applicationInsights 'modules/app-insights.bicep' = {
 }
 
 // For demo purposes, we are using a MySQL database. In a production environment, you should use more secure credentials.
-var mySqlAdminLogin = uniqueString(rg.id, environment, 'mysql-admin')
+var mysqlAdminLogin = 'sa'
 var mySqlAdminPassword = uniqueString(rg.id, environment, 'mysql-admin-password')
 
 module mysql 'modules/mysql-flexible.bicep' = {
@@ -61,7 +61,7 @@ module mysql 'modules/mysql-flexible.bicep' = {
     location: location
     environment: environment
     tags: defaultTags
-    adminLogin: mySqlAdminLogin
+    adminLogin: mysqlAdminLogin
     adminPassword: mySqlAdminPassword
   }
 }
@@ -95,7 +95,7 @@ module conatinerApp_Backend 'modules/container-apps.bicep' = {
     secrets: [
       {
         name: 'mysql-admin-login'
-        value: mySqlAdminLogin
+        value: mysqlAdminLogin
       }
       {
         name: 'mysql-admin-password'
