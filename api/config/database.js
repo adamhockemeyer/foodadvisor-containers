@@ -1,15 +1,5 @@
-// const path = require('path');
-
-// module.exports = ({ env }) => ({
-//   connection: {
-//     client: 'sqlite',
-//     connection: {
-//       filename: "DATABASE_FILENAME" in process.env ? env('DATABASE_FILENAME') : path.join(__dirname, '..', env('DATABASE_FILENAME', '.tmp/data.db')),
-//     },
-//     useNullAsDefault: true,
-//   },
-// });
-
+const fs = require('fs')
+const path = require('path')
 
 module.exports = ({ env }) => ({
   connection: {
@@ -21,9 +11,9 @@ module.exports = ({ env }) => ({
       user: env('DATABASE_USERNAME', 'strapi'),
       password: env('DATABASE_PASSWORD', 'strapi'),
       ssl: {
-        rejectUnauthorized: env.bool('DATABASE_SSL_SELF', false), // For self-signed certificates
+        ca: fs.readFileSync(path.resolve(__dirname, '..', 'DigiCertGlobalRootCA.crt.pem'))
       },
     },
-    debug: false,
+    debug: true,
   },
 });

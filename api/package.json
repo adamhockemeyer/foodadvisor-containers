@@ -1,8 +1,8 @@
 {
-  "name": "foodadvisor-v4",
+  "name": "foodadvisor",
   "private": true,
-  "version": "0.1.0",
-  "description": "A Strapi application",
+  "version": "2.0.0",
+  "description": "Official Strapi Demo Application",
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
@@ -12,18 +12,21 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "@strapi/plugin-documentation": "^4.1.12",
-    "@strapi/plugin-i18n": "4.1.12",
-    "@strapi/plugin-seo": "^1.7.2",
-    "@strapi/plugin-users-permissions": "4.1.12",
-    "@strapi/strapi": "4.1.12",
+    "@ckeditor/strapi-plugin-ckeditor": "^0.0.7",
+    "@offset-dev/strapi-calendar": "^0.0.8",
+    "@strapi/plugin-graphql": "^4.6.1",
+    "@strapi/plugin-i18n": "4.6.1",
+    "@strapi/plugin-seo": "^1.8.0",
+    "@strapi/plugin-users-permissions": "4.6.1",
+    "@strapi/strapi": "4.6.1",
+    "@webbio/strapi-plugin-scheduler": "^0.1.2",
     "applicationinsights": "^2.3.3",
-    "better-sqlite3": "7.4.6",
-    "fs": "^0.0.1-security",
+    "mysql": "^2.18.1",
+    "better-sqlite3": "^7.6.2",
     "fs-extra": "^10.0.0",
-    "lodash": "^4.17.21",
-    "lodash.set": "^4.3.2",
-    "sqlite3": "5.0.8",
+    "strapi-plugin-cookie-manager": "^1.0.7",
+    "strapi-plugin-populate-deep": "^1.1.2",
+    "strapi-plugin-todo": "^0.0.9",
     "unzip-stream": "^0.3.1",
     "uuid-v4": "^0.1.0"
   },
@@ -31,10 +34,10 @@
     "name": "A Strapi developer"
   },
   "strapi": {
-    "uuid": "FOODADVISOR-LOCAL-d9527d14-e1ac-4c34-b319-673beff79340"
+    "uuid": "91bcb9c3-39e5-43e4-ac15-05df0813913f"
   },
   "engines": {
-    "node": ">=12.x.x <=16.x.x",
+    "node": ">=14.x.x <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "MIT"
