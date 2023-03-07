@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.13.1.58284",
-      "templateHash": "6671165729946759898"
+      "templateHash": "8280724510080149135"
     }
   },
   "parameters": {
@@ -264,7 +264,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.13.1.58284",
-              "templateHash": "4649768126601611963"
+              "templateHash": "11378826259629404366"
             }
           },
           "parameters": {
@@ -283,7 +283,10 @@
             },
             "skuName": {
               "type": "string",
-              "defaultValue": "B1ms"
+              "defaultValue": "Standard_B1ms",
+              "metadata": {
+                "description": "The name of the SKU found via az mysql flexible-server list-skus -l eastus -o table"
+              }
             },
             "adminLogin": {
               "type": "string"
