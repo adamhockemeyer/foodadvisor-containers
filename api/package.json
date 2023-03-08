@@ -21,6 +21,7 @@
     "@strapi/strapi": "4.6.1",
     "@webbio/strapi-plugin-scheduler": "^0.1.2",
     "applicationinsights": "^2.3.3",
+    "codemirror": "5.65.12",
     "mysql": "^2.18.1",
     "better-sqlite3": "^7.6.2",
     "fs-extra": "^10.0.0",
